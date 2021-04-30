@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import TypedDict
 import requests
 import cutlet
 katsu = cutlet.Cutlet()
