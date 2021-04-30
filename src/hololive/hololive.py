@@ -1,27 +1,41 @@
-from datetime import datetime
-
-class _API_stream:
-  member: str
-  time: str
-  title: str
-  youtube_url: str
-
-class _API_day:
-  date: str
-  schedules: list[_API_stream]
-  
-class _API_schedule:
-  region: str
-  schedule: list[_API_day]
+from datetime import datetime, timedelta
+from typing import TypedDict
+import requests
+import cutlet
+katsu = cutlet.Cutlet()
+katsu.use_foreign_spelling = False
 
 class Stream:
   title_jp: str
   title_romaji: str
+  talent_jp: str
+  talent_romaji: str
   url: str
   starttime: datetime
+  
+def get_streams() -> list[Stream]:
+  streams: list[Stream] = []
+  API_schedule = requests.get("https://hololive-api.marnixah.com/").json()
+  for day in API_schedule["schedule"]:
+    date_month = day["date"].split("/")[0]
+    date_day = day["date"].split("/")[1]
+    for stream in day["schedules"]:
+      stream_obj = Stream()
+      stream_obj.url = stream["youtube_url"]
+      stream_obj.title_jp = stream["title"]
+      stream_obj.title_romaji = katsu.romaji(stream["title"])
+      stream_obj.talent_jp = stream["member"]
+      stream_obj.talent_romaji = katsu.romaji(stream["member"])
+      
+      time_arr = stream["time"].split(":")
+      hour = int(time_arr[0])
+      minute = int(time_arr[1])
 
-class Hololive:
-  streams: list[Stream]
-  
-  
-  
+      current_time = datetime.utcnow()
+      year = current_time.year
+
+      stream_obj.starttime = datetime(
+        year, int(date_month), int(date_day), hour, minute
+      ) - timedelta(hours=9)  # JST is 9 hours ahead of UTC
+      streams.append(stream_obj)
+  return streams
