@@ -1,15 +1,10 @@
 from datetime import datetime, timedelta
 from typing import List
 import requests
-# import cutlet
-# katsu = cutlet.Cutlet()
-# katsu.use_foreign_spelling = False
 
 class Stream:
   title_jp: str
-  title_romaji: str
   talent_jp: str
-  talent_romaji: str
   url: str
   starttime: datetime
   
@@ -23,9 +18,7 @@ async def get_streams() -> List[Stream]:
       stream_obj = Stream()
       stream_obj.url = stream["youtube_url"]
       stream_obj.title_jp = stream["title"]
-      # stream_obj.title_romaji = katsu.romaji(stream["title"])
       stream_obj.talent_jp = stream["member"]
-      # stream_obj.talent_romaji = katsu.romaji(stream["member"])
       
       time_arr = stream["time"].split(":")
       hour = int(time_arr[0])
