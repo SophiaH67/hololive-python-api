@@ -12,7 +12,7 @@ class Stream:
   url: str
   starttime: datetime
   
-def get_streams() -> list[Stream]:
+async def get_streams() -> list[Stream]:
   streams: list[Stream] = []
   API_schedule = requests.get("https://hololive-api.marnixah.com/").json()
   for day in API_schedule["schedule"]:
