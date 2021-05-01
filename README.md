@@ -9,7 +9,7 @@ pip install hololive
 
 ```python
 from hololive import hololive
-streams = hololive.get_streams()
+streams = await hololive.get_streams()
 
 for stream in streams:
   print(stream.title_romaji) # [Duolingo]? STADYYYYYYYYYYYY!!!!!!!!!# 2? [Momo Suzu Nene/Horo raibu]
