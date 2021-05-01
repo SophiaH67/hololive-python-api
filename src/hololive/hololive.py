@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import List
 import requests
 # import cutlet
 # katsu = cutlet.Cutlet()
@@ -12,7 +13,7 @@ class Stream:
   url: str
   starttime: datetime
   
-async def get_streams() -> list[Stream]:
+async def get_streams() -> List[Stream]:
   streams: list[Stream] = []
   API_schedule = requests.get("https://hololive-api.marnixah.com/").json()
   for day in API_schedule["schedule"]:
