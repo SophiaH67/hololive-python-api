@@ -16,9 +16,9 @@ async def get_streams() -> List[Stream]:
     date_day = day["date"].split("/")[1]
     for stream in day["schedules"]:
       stream_obj = Stream()
-      stream_obj.url = stream["youtube_url"]
-      stream_obj.title_jp = stream["title"]
-      stream_obj.talent_jp = stream["member"]
+      stream_obj.url = str(stream["youtube_url"])
+      stream_obj.title_jp = str(stream["title"])
+      stream_obj.talent_jp = str(stream["member"])
       
       time_arr = stream["time"].split(":")
       hour = int(time_arr[0])
