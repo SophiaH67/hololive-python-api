@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List
-import requests
+import aiohttp
 
 class Stream:
   title_jp: str
@@ -10,7 +10,8 @@ class Stream:
   
 async def get_streams() -> List[Stream]:
   streams: list[Stream] = []
-  API_schedule = requests.get("https://hololive-api.marnixah.com/").json()
+  session = aiohttp.ClientSession()
+  API_schedule = await (await session.get("https://hololive-api.marnixah.com/")).json()
   for day in API_schedule["schedule"]:
     date_month = day["date"].split("/")[0]
     date_day = day["date"].split("/")[1]
@@ -31,4 +32,5 @@ async def get_streams() -> List[Stream]:
         year, int(date_month), int(date_day), hour, minute
       ) - timedelta(hours=9)  # JST is 9 hours ahead of UTC
       streams.append(stream_obj)
+  await session.close()
   return streams
