@@ -14,7 +14,7 @@ class Stream:
   
 async def get_streams() -> List[Stream]:
   streams: list[Stream] = []
-  timeout = aiohttp.ClientTimeout(total=15)
+  timeout = aiohttp.ClientTimeout(total=30)
   session = aiohttp.ClientSession()
   API_schedule = None
   for url in urls:
