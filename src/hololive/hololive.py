@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 from typing import List
 import aiohttp
 from aiohttp.client_exceptions import ClientConnectorError
+from asyncio.exceptions import TimeoutError
 
-urls = ["https://hololive-api.marnixah.com/schedule", "http://hololive-api2.marnixah.com/schedule"]
+urls = ["https://hoololive-api.marnixah.com/schedule", "http://hololive-api2.marnixah.com/schedule"]
 
 class Stream:
   title_jp: str
@@ -13,13 +14,16 @@ class Stream:
   
 async def get_streams() -> List[Stream]:
   streams: list[Stream] = []
+  timeout = aiohttp.ClientTimeout(total=15)
   session = aiohttp.ClientSession()
   API_schedule = None
   for url in urls:
     try:
-      API_schedule = await (await session.get(url)).json()
+      API_schedule = await (await session.get(url, timeout=timeout)).json()
       break
     except ClientConnectorError:
+      pass
+    except TimeoutError:
       pass
   for day in API_schedule["schedule"]:
     date_month = day["date"].split("/")[0]
