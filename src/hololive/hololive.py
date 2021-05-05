@@ -5,7 +5,7 @@ import aiohttp
 from aiohttp.client_exceptions import ClientConnectorError
 from asyncio.exceptions import TimeoutError
 
-urls = ["https://hoololive-api.marnixah.com/schedule", "http://hololive-api2.marnixah.com/schedule"]
+urls = ["https://hololive-api.marnixah.com/schedules", "http://hololive-api2.marnixah.com/schedules"]
 
 class Stream:
   title_jp: str
