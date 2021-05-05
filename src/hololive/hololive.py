@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List
+import json
 import aiohttp
 from aiohttp.client_exceptions import ClientConnectorError
 from asyncio.exceptions import TimeoutError
@@ -14,16 +15,17 @@ class Stream:
   
 async def get_streams() -> List[Stream]:
   streams: list[Stream] = []
-  timeout = aiohttp.ClientTimeout(total=30)
   session = aiohttp.ClientSession()
   API_schedule = None
   for url in urls:
-    try:
-      API_schedule = await (await session.get(url, timeout=timeout)).json()
+    try:  
+      API_schedule = json.loads(await (await session.get(url)).text())
       break
     except ClientConnectorError:
       pass
     except TimeoutError:
+      pass
+    except json.decoder.JSONDecodeError:
       pass
   for day in API_schedule["schedule"]:
     date_month = day["date"].split("/")[0]
