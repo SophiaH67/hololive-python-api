@@ -17,6 +17,7 @@ async def get_streams() -> List[Stream]:
   streams: list[Stream] = []
   session = aiohttp.ClientSession()
   API_schedule = None
+  await session.close()
   for url in urls:
     try:  
       API_schedule = json.loads(await (await session.get(url)).text())
@@ -47,5 +48,4 @@ async def get_streams() -> List[Stream]:
         year, int(date_month), int(date_day), hour, minute
       ) - timedelta(hours=9)  # JST is 9 hours ahead of UTC
       streams.append(stream_obj)
-  await session.close()
   return streams
