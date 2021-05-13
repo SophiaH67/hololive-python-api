@@ -28,6 +28,8 @@ async def get_streams() -> List[Stream]:
     except json.decoder.JSONDecodeError:
       pass
   await session.close()
+  if API_schedule is None:
+    return None
   for day in API_schedule["schedule"]:
     date_month = day["date"].split("/")[0]
     date_day = day["date"].split("/")[1]
