@@ -20,6 +20,8 @@ async def get_streams() -> List[Stream]:
   for url in urls:
     try:  
       API_schedule = json.loads(await (await session.get(url)).text())
+      if not API_schedule:
+        pass
       break
     except ClientConnectorError:
       pass
