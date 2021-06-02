@@ -17,21 +17,16 @@ async def get_streams() -> List[Stream]:
   streams: list[Stream] = []
   session = aiohttp.ClientSession()
   API_schedule = None
-  for url in urls:
-    try:  
+  i=0
+  while API_schedule == None:
+    i = 0 if i > len(urls)-1 else i
+    url = urls[i]
+    try:
       API_schedule = json.loads(await (await session.get(url)).text())
-      if not API_schedule:
-        pass
-      break
-    except ClientConnectorError:
+    except:
       pass
-    except TimeoutError:
-      pass
-    except json.decoder.JSONDecodeError:
-      pass
+    i+=1
   await session.close()
-  if API_schedule is None:
-    return []
   for day in API_schedule["schedule"]:
     date_month = day["date"].split("/")[0]
     date_day = day["date"].split("/")[1]
