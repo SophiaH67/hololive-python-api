@@ -1,50 +1,111 @@
-from datetime import datetime, timedelta
-from typing import List
-import json
+from datetime import datetime
+from typing import List, Optional
 import aiohttp
-from aiohttp.client_exceptions import ClientConnectorError
-from asyncio.exceptions import TimeoutError
+from dateutil import parser
+from enum import Enum
+from os import getenv
 
-urls = ["https://hololive-api.marnixah.com/schedules", "https://hololive-api2.marnixah.com/schedules"]
+url = getenv("HOLODEX_BASE_URL") or "https://holodex.net/api/v2"
+
+class Status(Enum):
+  NEW = "new"
+  UPCOMING = "upcoming"
+  LIVE = "live"
+  PAST = "past"
+  MISSING = "missing"
+
+class Order(Enum):
+  ASC = "asc"
+  DESC = "desc"
+
+class StreamType(Enum):
+  STREAM = "stream"
+  CLIP = "clip"
 
 class Stream:
-  title_jp: str
-  talent_jp: str
-  url: str
-  starttime: datetime
-  
-async def get_streams() -> List[Stream]:
-  streams: list[Stream] = []
-  session = aiohttp.ClientSession()
-  API_schedule = None
-  i=0
-  while API_schedule == None:
-    i = 0 if i > len(urls)-1 else i
-    url = urls[i]
-    try:
-      API_schedule = json.loads(await (await session.get(url)).text())
-    except:
-      pass
-    i+=1
-  await session.close()
-  for day in API_schedule["schedule"]:
-    date_month = day["date"].split("/")[0]
-    date_day = day["date"].split("/")[1]
-    for stream in day["schedules"]:
-      stream_obj = Stream()
-      stream_obj.url = str(stream["youtube_url"])
-      stream_obj.title_jp = str(stream["title"])
-      stream_obj.talent_jp = str(stream["member"])
+  id: str
+  title: str
+  type: StreamType
+  topic_id: Optional[str]
+  published_at: str
+  available_at: str
+  duration: int
+  status: Status
+  start_scheduled: Optional[str]
+  start_actual: Optional[str]
+  end_actual: Optional[str]
+  live_viewers: Optional[int]
+  description: Optional[str]
+  songcount: Optional[int]
+  channel_id: Optional[str]
+
+async def get_live(channel_id:str=None, id:str=None, include:str=None, lang:str=None, limit:int=None, max_upcoming_hours:int=None, mentioned_channel_id:str=None, offset:int=None, order:Order=None, org:str=None, paginated:str=None,sort:str=None,status:Status=None,topic:str=None,type:StreamType=None) -> List[Stream]:
+  """https://holodex.stoplight.io/docs/holodex/b3A6MTE2MjAyMzU-query-live-and-upcoming-videos
+
+  Args:
+      channel_id (str, optional): Filter by video uploader channel id. Defaults to None.
+      id (str, optional): A single Youtube Video ID. If Specified, only this video can be returned (may be filtered out by other conditions though). Defaults to None.
+      include (str, optional): Comma separated list of extra info for video. Defaults to None.
+      lang (str, optional): A comma separated list of language codes to filter channels/clips, official streams do not follow this parameter. Defaults to None.
+      limit (int, optional): Results limit. Defaults to None.
+      max_upcoming_hours (int, optional): Number of maximum hours upcoming to get upcoming videos by (for rejecting waiting rooms that are two years out). Defaults to None.
+      mentioned_channel_id (str, optional): Filter by mentioned channel id, excludes itself. Generally used to find collabs/clips that include the requested channel. Defaults to None.
+      offset (int, optional): Offset results. Defaults to None.
+      order (Order, optional): Order by ascending or descending. Defaults to None.
+      org (str, optional): Filter by clips that feature the org's talent or videos posted by the org's talent. Defaults to None.
+      paginated (str, optional): If paginated is set to any non-empty value, return an object with total, otherwise returns an array. Defaults to None.
+      sort (str, optional): Sort by any returned video field. Defaults to None.
+      status (Status, optional): Filter by video status. Defaults to None.
+      topic (str, optional): Filter by video topic id. Defaults to None.
+      type (Status, optional): Filter by video status. Defaults to None.
       
-      time_arr = stream["time"].split(":")
-      hour = int(time_arr[0])
-      minute = int(time_arr[1])
 
-      current_time = datetime.utcnow()
-      year = current_time.year
+  Returns:
+      List[Stream]: [description]
+  """
+  params = {
+    "channel_id": channel_id,
+    "id": id,
+    "include": include,
+    "lang": lang,
+    "limit": limit,
+    'max_upcoming_hours': max_upcoming_hours,
+    "mentioned_channel_id": mentioned_channel_id,
+    "offset": offset,
+    "order": getattr(order, "value", None),
+    "org": org,
+    "paginated": paginated,
+    "sort": sort,
+    "status": getattr(status, "value", None),
+    "topic": topic,
+    "type": getattr(type, "value", None)
+  }
 
-      stream_obj.starttime = datetime(
-        year, int(date_month), int(date_day), hour, minute
-      ) - timedelta(hours=9)  # JST is 9 hours ahead of UTC
-      streams.append(stream_obj)
+  session = aiohttp.ClientSession()
+  response = await (await session.get(url+"/live", 
+    # Remove None's from params
+    params={k: v for k, v in params.items() if v is not None}
+  )).json()
+
+  streams: List[Stream] = []
+  for res in response:
+    stream = Stream()
+    stream.id = res["id"] #!
+    stream.title = res["title"] #!
+    stream.type = StreamType.CLIP if res.get("type", None) == "clip" else StreamType.STREAM
+    stream.topic_id = res.get("topic_id", None)
+    stream.published_at = parser.isoparse(res["published_at"]) if res.get("published_at", None) else None
+    stream.available_at = parser.isoparse(res["available_at"]) if res.get("available_at", None) else None
+    stream.duration = res["duration"]
+    stream.status = res["status"]
+    stream.start_scheduled = parser.isoparse(res["start_scheduled"]) if res.get("start_scheduled", None) else None
+    stream.start_actual = parser.isoparse(res["start_actual"]) if res.get("start_actual", None) else None
+    stream.end_actual = parser.isoparse(res["end_actual"]) if res.get("end_actual", None) else None
+    stream.live_viewers = res.get("live_viewers", None)
+    stream.description = res.get("description", None)
+    stream.songcount = res.get("songcount", None)
+    stream.channel_id = res.get("channel_id", None)
+
+    streams.append(stream)
+  await session.close()
   return streams

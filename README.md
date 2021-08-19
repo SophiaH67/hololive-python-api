@@ -1,5 +1,6 @@
 # hololive-python-api
 
+Gets stream info from holodex(no longer limited to only hololive)
 ## Installation
 ```bash
 pip install hololive
@@ -9,11 +10,14 @@ pip install hololive
 
 ```python
 from hololive import hololive
-streams = await hololive.get_streams()
+streams = await hololive.get_live(limit=5)
 
 for stream in streams:
-  print(stream.title_jp) # 【Duolingo】🍑STADYYYYYYYYYYYY!!!!!!!!! #２🍑【桃鈴ねね/ ホロライブ】
-  print(stream.talent_jp) # 桃鈴ねね
-  print(stream.starttime) # 2021-05-01 03:00:00
-  print(stream.url) # https://www.youtube.com/watch?v=MWeu_kf2L94
+  print(stream.title)
+# -----------------
+# 【APEX】カスタム3日目【#あの伝WIN】
+# 【APEX】 casual & arena rank?
+# 【APEX】V最協決定戦カスタム4 #KGSWIN 【ぶいすぽ / 花芽すみれ】
+# 【APEX】最協カスタム4日目→ソロランク修行【ふぇありす/弦月藤士郎/パカエル】
+# 【Portal 2】 😈마왕적 포탈! 👾 魔王的ポータル😈 【NIJISANJI KR】
   ```
