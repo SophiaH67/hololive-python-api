@@ -27,13 +27,13 @@ class Stream:
   title: str
   type: StreamType
   topic_id: Optional[str]
-  published_at: str
-  available_at: str
+  published_at: datetime
+  available_at: datetime
   duration: int
   status: Status
-  start_scheduled: Optional[str]
-  start_actual: Optional[str]
-  end_actual: Optional[str]
+  start_scheduled: Optional[datetime]
+  start_actual: Optional[datetime]
+  end_actual: Optional[datetime]
   live_viewers: Optional[int]
   description: Optional[str]
   songcount: Optional[int]
@@ -94,8 +94,8 @@ async def get_live(channel_id:str=None, id:str=None, include:str=None, lang:str=
     stream.title = res["title"] #!
     stream.type = StreamType.CLIP if res.get("type", None) == "clip" else StreamType.STREAM
     stream.topic_id = res.get("topic_id", None)
-    stream.published_at = parser.isoparse(res["published_at"]) if res.get("published_at", None) else None
-    stream.available_at = parser.isoparse(res["available_at"]) if res.get("available_at", None) else None
+    stream.published_at = parser.isoparse(res["published_at"])
+    stream.available_at = parser.isoparse(res["available_at"])
     stream.duration = res["duration"]
     stream.status = res["status"]
     stream.start_scheduled = parser.isoparse(res["start_scheduled"]) if res.get("start_scheduled", None) else None
