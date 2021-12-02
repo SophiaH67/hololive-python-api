@@ -37,7 +37,12 @@ class Stream:
   live_viewers: Optional[int]
   description: Optional[str]
   songcount: Optional[int]
-  channel_id: Optional[str]
+  channel_id: str
+  channel_name: str
+  channel_org: str
+  channel_type: str
+  channel_photo: str
+  
 
 async def get_live(channel_id:str=None, id:str=None, include:str=None, lang:str=None, limit:int=None, max_upcoming_hours:int=None, mentioned_channel_id:str=None, offset:int=None, order:Order=None, org:str=None, paginated:str=None,sort:str=None,status:Status=None,topic:str=None,type:StreamType=None) -> List[Stream]:
   """https://holodex.stoplight.io/docs/holodex/b3A6MTE2MjAyMzU-query-live-and-upcoming-videos
@@ -104,7 +109,11 @@ async def get_live(channel_id:str=None, id:str=None, include:str=None, lang:str=
     stream.live_viewers = res.get("live_viewers", None)
     stream.description = res.get("description", None)
     stream.songcount = res.get("songcount", None)
-    stream.channel_id = res.get("channel_id", None)
+    stream.channel_id = res["channel"]["id"]
+    stream.channel_name = res["channel"]["name"]
+    stream.channel_org = res["channel"]["org"]
+    stream.channel_type = res["channel"]["type"]
+    stream.channel_photo = res["channel"]["photo"]
 
     streams.append(stream)
   await session.close()
